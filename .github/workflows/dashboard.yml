@@ -1,0 +1,77 @@
+name: dashboard
+
+# Rebuilds the dashboard from the PSE API and deploys it to GitHub Pages.
+# Scheduled runs only act when the repository variable DASHBOARD_SCHEDULE is "on";
+# a manual run (workflow_dispatch) always builds and deploys.
+
+on:
+  schedule:
+    - cron: "15 15 * * *"   # after PSE publishes next-day prices and plans (~13:45-15:45 Warsaw time)
+    - cron: "15 19 * * *"   # evening run: late publications, more of today's actual generation
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  actions: write            # keep-alive: re-enable this workflow so the schedule survives quiet months
+
+concurrency:
+  group: dashboard
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.event_name == 'workflow_dispatch' || vars.DASHBOARD_SCHEDULE == 'on'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -e .
+
+      # monthly Parquet files of the PSE series + solved battery days; nothing is committed to the repository
+      - name: Restore data cache
+        uses: actions/cache/restore@v4
+        with:
+          path: data
+          key: pse-data-${{ github.run_id }}
+          restore-keys: pse-data-
+
+      # exits with code 2 only when no price data are available at all; then nothing is deployed
+      # and the previously published page stays online
+      - name: Build dashboard
+        run: python -m pl_power_market build --out site
+
+      - name: Save data cache
+        if: always() && hashFiles('data/*.parquet') != ''
+        uses: actions/cache/save@v4
+        with:
+          path: data
+          key: pse-data-${{ github.run_id }}
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      # GitHub disables scheduled workflows after 60 days without repository activity
+      - name: Keep the schedule alive
+        if: github.event_name == 'schedule'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X PUT "repos/${{ github.repository }}/actions/workflows/dashboard.yml/enable"
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
