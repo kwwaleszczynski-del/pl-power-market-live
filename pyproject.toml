@@ -15,6 +15,8 @@ dependencies = [
     "pyarrow>=14",
     "requests>=2.31",
     "plotly>=5.20",
+    "matplotlib>=3.8",      # thumb.webp preview for the portfolio page
+    "pillow>=10",
     # daily MILP battery dispatch, pinned to a published commit of the companion project
     "bess-arbitrage-pl @ git+https://github.com/kwwaleszczynski-del/bess-arbitrage-pl@6a036f10d56d971dfb1f88ba685080c6de3febb7",
 ]

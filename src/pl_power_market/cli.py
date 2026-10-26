@@ -61,6 +61,11 @@ def cmd_build(args, today: date) -> int:
     build_site(loaded, today=today, now=pd.Timestamp.now(tz="UTC"), out_dir=args.out,
                price_series=args.price_series, repo_url=args.repo_url)
     log.info("dashboard written to %s", args.out / "index.html")
+    try:
+        from pl_power_market.thumbnail import write_thumbnail
+        write_thumbnail(args.out)
+    except Exception:  # the preview image must never block the dashboard
+        log.exception("thumbnail not written")
     return 0
 
 
