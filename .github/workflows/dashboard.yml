@@ -38,8 +38,8 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: data
-          key: pse-data-${{ github.run_id }}
-          restore-keys: pse-data-
+          key: pse-opendata-${{ github.run_id }}
+          restore-keys: pse-opendata-
 
       # exits with code 2 only when no price data are available at all; then nothing is deployed
       # and the previously published page stays online
@@ -47,11 +47,11 @@ jobs:
         run: python -m pl_power_market build --out site
 
       - name: Save data cache
-        if: always() && hashFiles('data/*.parquet') != ''
+        if: always() && hashFiles('data/**/*.parquet') != ''
         uses: actions/cache/save@v4
         with:
           path: data
-          key: pse-data-${{ github.run_id }}
+          key: pse-opendata-${{ github.run_id }}
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

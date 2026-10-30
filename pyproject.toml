@@ -7,16 +7,16 @@ name = "pl-power-market-live"
 version = "0.1.0"
 description = "Daily-refreshed dashboard of the Polish power market (PSE open data): prices, spreads, negative prices, generation mix and battery arbitrage potential."
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 license = { text = "MIT" }
 dependencies = [
     "numpy>=1.26",
     "pandas>=2.1",
     "pyarrow>=14",
-    "requests>=2.31",
     "plotly>=5.20",
     "matplotlib>=3.8",      # thumb.webp preview for the portfolio page
     "pillow>=10",
+    "pse-opendata>=0.2,<0.3",
     # daily MILP battery dispatch, pinned to a published commit of the companion project
     "bess-arbitrage-pl @ git+https://github.com/kwwaleszczynski-del/bess-arbitrage-pl@6a036f10d56d971dfb1f88ba685080c6de3febb7",
 ]

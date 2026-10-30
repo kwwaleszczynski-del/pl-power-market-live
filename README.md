@@ -63,9 +63,10 @@ flowchart LR
     cache --> calc
 ```
 
-1. **Fetch** (`pse_api.py`): five series from `https://api.raporty.pse.pl/api`, paginated with `nextLink`, stored as
-   one Parquet file per series and month. Months that ended more than 10 days ago are final and read from cache;
-   recent months are downloaded again on every run to pick up late publications and settlement corrections.
+1. **Fetch** (`pse_api.py`): five series from `https://api.raporty.pse.pl/api` through
+   [pse-opendata](https://pypi.org/project/pse-opendata/), stored as one Parquet file per report and month. A month
+   is downloaded again on every run until the revision window of its report has passed (3 days for prices, 60 for
+   generation, 120 for the imbalance price CEN), to pick up late publications and settlement corrections.
 2. **Compute** (`metrics.py`, `arbitrage.py`): daily statistics, negative-price hours, the hour x month profile, the
    generation mix, PV bins, and the optimal daily dispatch of a battery. The optimiser is imported from the companion
    project [bess-arbitrage-pl](https://github.com/kwwaleszczynski-del/bess-arbitrage-pl) (pinned commit); solved days
@@ -80,7 +81,7 @@ flowchart LR
 
 | Situation | Result |
 |---|---|
-| One request fails | retried 3 times with back-off |
+| One request fails | retried 4 times with back-off (honouring `Retry-After`) |
 | API down for a series | cached months are used, the series is marked *stale* on the page and the badge turns amber |
 | API down, nothing cached for a series | panels that need it show a short note; all other panels are built |
 | A panel raises an unexpected error | that panel is replaced by a note, the rest of the page is published |
@@ -132,8 +133,8 @@ with attribution. Check PSE's terms before any commercial reuse.
   trading, capacity market, grid fees or taxes. See bess-arbitrage-pl for sensitivity to efficiency and cycle limits.
 - **Correlation, not causation**: the PV panel shows how prices behave at different PV levels; demand, wind,
   season and cross-border flows move at the same time.
-- **Revisions**: PSE corrects settlement data (notably CEN) weeks or months later. Months older than the refresh
-  window are not downloaded again, so very late corrections are picked up only after a cache reset.
+- **Revisions**: PSE corrects settlement data (notably CEN) weeks or months later. Months older than the revision
+  window of their report are not downloaded again, so very late corrections are picked up only after a cache reset.
 - **Schedule timing**: GitHub's cron can start runs late by tens of minutes; tomorrow's prices appear on the page
   after the first successful run following PSE's publication.
 - Prices in nominal PLN; nothing on the page is investment advice.
@@ -164,7 +165,7 @@ The first build downloads the full history (about 7 MB of Parquet, a minute) and
 
 ```
 src/pl_power_market/
-  pse_api.py      PSE API client, pagination, fault-tolerant monthly Parquet cache
+  pse_api.py      PSE series through pse-opendata, fault-tolerant loading, data status
   metrics.py      daily prices, spreads, negative hours, hour x month profile, generation mix, PV bins
   arbitrage.py    daily battery dispatch via bess-arbitrage-pl, cached by price hash
   figures.py      Plotly figures and the light / dark palette

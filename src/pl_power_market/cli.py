@@ -5,7 +5,8 @@ Usage:
     python -m pl_power_market build --out site         # refresh data and render the dashboard
     python -m pl_power_market build --today 2026-10-21 --offline   # rebuild from cache, fixed "today"
 
-Data are cached as monthly Parquet files in ./data (override with --data-dir or PLPM_DATA_DIR). The build never
+Data are read with pse-opendata and cached as monthly Parquet files in ./data (override with --data-dir or
+PLPM_DATA_DIR). The build never
 fails on API errors as long as price data are available (from the API or the cache); without any price data it
 exits with code 2 so that a scheduled deployment keeps the previously published page.
 """
@@ -40,7 +41,7 @@ def load_all(args, today: date):
     }
     out = {}
     for name, start in starts.items():
-        out[name] = load_series(name, start, end, args.data_dir, today=today, offline=args.offline)
+        out[name] = load_series(name, start, end, args.data_dir, offline=args.offline)
         df, status = out[name]
         log.info("%s: %d intervals, last %s, fetched %d, cached %d, stale %s, missing %s", name, len(df),
                  status.last_interval, len(status.fetched), len(status.cached), status.stale, status.missing)
