@@ -44,7 +44,9 @@ before delivery).
   about 500 PLN/MWh; above 7 GW it falls to 120-260 PLN/MWh and about one in five quarter-hours clears below zero.
 - **Spreads are widening**: the 30-day mean of the daily max − min spread is 918 PLN/MWh, against 694 a year earlier.
 - **Battery arbitrage potential** (1 MW / 2 MWh, perfect foresight, upper bound): 308 k PLN in 2025 and already
-  344 k PLN in 2026 by 22 October; the last 30 days averaged 1 430 PLN per day, about 520 k PLN per MW per year.
+  344 k PLN in 2026 by 22 October, and 379 k PLN in the last 12 months (23 October 2025 - 22 October 2026). The last
+  30 days averaged 1 430 PLN per day, against 1 019 PLN in the same 30 days a year earlier; autumn spreads are wide,
+  so a month does not scale to a year.
 - **Imbalance prices are far more volatile than day-ahead prices**: over the last settled week CEN deviated from RCE
   by 267 PLN/MWh on average, with quarter-hours from -2489 to 3670 PLN/MWh.
 
@@ -109,9 +111,22 @@ change).
 RCE and SDAC are close but not identical; the history panels and the battery model use RCE (selectable with
 `--price-series sdac`).
 
-**Licence and attribution.** Data: PSE S.A., public reports at raporty.pse.pl. PSE does not publish an explicit
-open-data licence for this API; this repository contains no PSE data, and the dashboard republishes derived statistics
-with attribution. Check PSE's terms before any commercial reuse.
+**Terms of use.** PSE publishes conditions for re-using public sector information
+([www.pse.pl, BIP, "Ponowne wykorzystywanie informacji sektora publicznego"](https://www.pse.pl/bip/ponowne-wykorzystanie-informacji-publicznej),
+entry changed on 14 October 2026, checked on 31 October 2026). They allow commercial and non-commercial re-use of
+information published on www.pse.pl free of charge, on condition that the user names the source and the date the
+information was obtained, removes the PSE logo, and, when the information has been processed, tells recipients that
+it was changed and how, without misleading them. PSE accepts no liability for processed information and notes that
+some materials may be protected by copyright or database rights. These conditions are written for www.pse.pl; this
+project applies them to the reports API of the same operator. The page footer carries the attribution with the date
+of each build:
+
+> Information obtained from www.pse.pl (PSE S.A. reports `rce-pln`, `csdac-pln`, `his-wlk-cal`, `pdgopkd`,
+> `crb-rozl`), state as of the build time shown on the page. The information has been processed: aggregated to daily,
+> monthly and hourly statistics, combined across reports and used in a battery model. It is not an official PSE
+> publication.
+
+The repository contains no PSE data; the page and its CSV files publish derived statistics.
 
 ## Method notes
 
@@ -129,8 +144,11 @@ with attribution. Check PSE's terms before any commercial reuse.
 
 ## Limitations
 
-- **The battery figure is an upper bound** for pure day-ahead arbitrage: no bidding risk, balancing services, intraday
-  trading, capacity market, grid fees or taxes. See bess-arbitrage-pl for sensitivity to efficiency and cycle limits.
+- **The battery figure is an upper bound** for pure day-ahead arbitrage: bids go in before the auction, so no operator
+  knows these prices when bidding; no balancing services, intraday trading, capacity market, grid fees or taxes. See
+  [bess-arbitrage-pl](https://github.com/kwwaleszczynski-del/bess-arbitrage-pl) for sensitivity to efficiency and cycle
+  limits and [pl-bess-paper-trading](https://github.com/kwwaleszczynski-del/pl-bess-paper-trading) for what a forecast
+  made before the gate earns (about 83 % of the upper bound in its backtest).
 - **Correlation, not causation**: the PV panel shows how prices behave at different PV levels; demand, wind,
   season and cross-border flows move at the same time.
 - **Revisions**: PSE corrects settlement data (notably CEN) weeks or months later. Months older than the revision

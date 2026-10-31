@@ -140,9 +140,11 @@ $cards
       <h3>Battery model</h3>
       <p>$battery. Each delivery day is solved as a mixed-integer linear program (HiGHS) that chooses when to charge
         and discharge with perfect knowledge of that day's prices, using the optimiser of the companion project
-        <a href="https://github.com/kwwaleszczynski-del/bess-arbitrage-pl">bess-arbitrage-pl</a>. Day-ahead prices
-        are known before delivery, so this is the upper bound of pure day-ahead arbitrage: no balancing services,
-        intraday trading, grid fees or bidding risk.</p>
+        <a href="https://github.com/kwwaleszczynski-del/bess-arbitrage-pl">bess-arbitrage-pl</a>. Day-ahead bids
+        are submitted before the auction and the price is its result, so no operator knows these prices when bidding:
+        this is the upper bound of pure day-ahead arbitrage, without bidding risk, balancing services, intraday
+        trading or grid fees. With a forecast made before the gate a backtest earns about 83 % of it
+        (<a href="https://github.com/kwwaleszczynski-del/pl-bess-paper-trading">pl-bess-paper-trading</a>).</p>
       <h3>Refresh and resilience</h3>
       <p>A scheduled GitHub Actions workflow rebuilds the page every afternoon after PSE publishes next-day prices.
         Data are cached as monthly Parquet files; recent months are downloaded again on every run to pick up late
@@ -160,7 +162,9 @@ $status_rows
 </section>
 
 <footer class="site">
-  Data: PSE S.A., public reports (raporty.pse.pl). Analysis and code: Konrad Waleszczyński, MIT licence.
+  Information obtained from www.pse.pl (PSE S.A. reports rce-pln, csdac-pln, his-wlk-cal, pdgopkd, crb-rozl), state
+  as of $updated; processed into daily, monthly and hourly statistics and a battery model, not an official PSE
+  publication. Analysis and code: Konrad Waleszczyński, MIT licence.
   Figures are estimates for illustration and not investment advice.
 </footer>
 </div>

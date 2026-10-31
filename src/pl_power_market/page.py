@@ -173,8 +173,11 @@ class Dashboard:
         a = self.arb
         last30 = a["revenue_pln"].iloc[-30:]
         prev_year = a.loc[(a.index > a.index[-1] - pd.Timedelta(days=395)) & (a.index <= a.index[-1] - pd.Timedelta(days=365)), "revenue_pln"]
-        sub = (f"Last 30 days: {_fmt(last30.mean())} PLN/day on average, about {_fmt(last30.mean() * 365 / 1000)} k PLN per MW "
-               f"per year" + (f" (same 30 days a year earlier: {_fmt(prev_year.mean())} PLN/day)." if len(prev_year) else "."))
+        # the sum of the last 365 days, not 30 days times 365: spreads are seasonal
+        last12 = a.loc[a.index > a.index[-1] - pd.Timedelta(days=365), "revenue_pln"]
+        sub = (f"Last 30 days: {_fmt(last30.mean())} PLN/day on average"
+               + (f" (same 30 days a year earlier: {_fmt(prev_year.mean())} PLN/day)" if len(prev_year) else "")
+               + f". Last 12 months ({len(last12)} days): {_fmt(last12.sum() / 1000)} k PLN per MW in total.")
         return Panel("", "", sub, figures.bess_history(a), "", "daily.csv")
 
     def p_spreads(self) -> Panel:
