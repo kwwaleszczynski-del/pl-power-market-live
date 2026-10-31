@@ -203,6 +203,16 @@ $figures
       var src = document.getElementById(div.getAttribute("data-fig"));
       if (!src) { return; }
       var fig = themed(src.textContent, dark);
+      if (window.innerWidth < 640) {
+        // phones: quarterly month labels collide, and long axis titles run past the chart
+        Object.keys(fig.layout).forEach(function (k) {
+          var ax = fig.layout[k];
+          if (!/^xaxis\d*$$/.test(k) || !ax) { return; }
+          if (ax.dtick === "M3") { ax.dtick = "M6"; }
+          var tt = ax.title && ax.title.text;
+          if (tt && tt.length > 34) { ax.title.text = tt.replace(" (", "<br>("); }
+        });
+      }
       var nojs = div.querySelector(".nojs");
       if (nojs) { nojs.remove(); }
       div.style.height = (fig.layout.height || 380) + "px";
